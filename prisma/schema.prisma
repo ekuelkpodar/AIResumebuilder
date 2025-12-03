@@ -70,6 +70,16 @@ model User {
   personas      CareerPersona[]
   featureFlags  FeatureFlag[]
   comments      Comment[]
+  organizations OrganizationMembership[]
+  jobSources    JobSource[]
+  jobLeads      JobLead[]
+  interviewSessions UserInterviewSession[]
+  stories       UserStory[]
+  portfolios    Portfolio[]
+  contacts      Contact[]
+  outreachMessages OutreachMessage[]
+  userPlugins   UserPluginConfig[]
+  webhooks      WebhookEndpoint[]
 }
 
 enum UserRole {
@@ -129,6 +139,7 @@ model Resume {
   jobApplications JobApplication[]
   versions      ResumeVersion[]
   comments      Comment[]
+  portfolioProjects PortfolioProject[]
 }
 
 model ResumeSection {
@@ -249,6 +260,303 @@ model FeatureFlag {
   createdAt DateTime @default(now())
 
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model JobSource {
+  id        String   @id @default(cuid())
+  userId    String
+  name      String
+  platform  String
+  searchUrl String
+  filters   Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  leads     JobLead[]
+}
+
+enum JobLeadStatus {
+  NEW
+  REVIEWED
+  ADDED_TO_TRACKER
+  IGNORED
+}
+
+model JobLead {
+  id          String        @id @default(cuid())
+  userId      String
+  jobSourceId String?
+  title       String
+  company     String
+  location    String?
+  link        String?
+  rawData     Json?
+  status      JobLeadStatus @default(NEW)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  jobSource   JobSource?    @relation(fields: [jobSourceId], references: [id], onDelete: SetNull)
+}
+
+enum QuestionCategory {
+  BEHAVIORAL
+  TECHNICAL
+  CASE
+  SYSTEM_DESIGN
+}
+
+enum QuestionDifficulty {
+  EASY
+  MEDIUM
+  HARD
+}
+
+model InterviewQuestion {
+  id          String             @id @default(cuid())
+  category    QuestionCategory
+  roleTags    String[]
+  difficulty  QuestionDifficulty
+  questionText String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model UserInterviewSession {
+  id          String   @id @default(cuid())
+  userId      String
+  roleTarget  String
+  sessionType String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  answers     UserInterviewAnswer[]
+}
+
+model UserInterviewAnswer {
+  id          String   @id @default(cuid())
+  sessionId   String
+  questionId  String?
+  answerText  String
+  aiFeedback  Json?
+  score       Int?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  session     UserInterviewSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  question    InterviewQuestion?   @relation(fields: [questionId], references: [id], onDelete: SetNull)
+}
+
+model UserStory {
+  id        String   @id @default(cuid())
+  userId    String
+  title     String
+  context   String?
+  task      String?
+  action    String?
+  result    String?
+  tags      String[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Portfolio {
+  id          String   @id @default(cuid())
+  userId      String
+  slug        String   @unique
+  title       String
+  headline    String?
+  bio         String?
+  sections    Json
+  themeConfig Json
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  projects    PortfolioProject[]
+}
+
+model PortfolioProject {
+  id            String   @id @default(cuid())
+  portfolioId   String
+  resumeId      String?
+  title         String
+  subtitle      String?
+  description   String?
+  role          String?
+  technologies  String[]
+  links         Json?
+  impactMetrics Json?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  portfolio     Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+  resume        Resume?   @relation(fields: [resumeId], references: [id], onDelete: SetNull)
+}
+
+model Contact {
+  id        String   @id @default(cuid())
+  userId    String
+  name      String
+  roleTitle String?
+  company   String?
+  email     String?
+  linkedinUrl String?
+  notes     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  messages  OutreachMessage[]
+}
+
+enum OutreachChannel {
+  EMAIL
+  LINKEDIN
+  OTHER
+}
+
+enum OutreachStatus {
+  DRAFT
+  SENT
+  NEEDS_REPLY
+  CLOSED
+}
+
+model OutreachMessage {
+  id          String          @id @default(cuid())
+  userId      String
+  contactId   String?
+  channel     OutreachChannel
+  body        String
+  subject     String?
+  status      OutreachStatus  @default(DRAFT)
+  sentAt      DateTime?
+  followUpDate DateTime?
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  user        User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  contact     Contact?        @relation(fields: [contactId], references: [id], onDelete: SetNull)
+}
+
+model Organization {
+  id        String   @id @default(cuid())
+  name      String
+  domain    String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  memberships OrganizationMembership[]
+  openings   JobOpening[]
+}
+
+enum OrganizationRole {
+  OWNER
+  ADMIN
+  MEMBER
+}
+
+model OrganizationMembership {
+  id              String            @id @default(cuid())
+  organizationId  String
+  userId          String
+  role            OrganizationRole  @default(MEMBER)
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  organization    Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user            User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+enum JobOpeningStatus {
+  OPEN
+  PAUSED
+  CLOSED
+}
+
+model JobOpening {
+  id          String           @id @default(cuid())
+  organizationId String
+  title       String
+  description String
+  location    String?
+  status      JobOpeningStatus @default(OPEN)
+  applicationFormConfig Json?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  submissions  CandidateSubmission[]
+}
+
+enum CandidateStatus {
+  RECEIVED
+  REVIEWING
+  INTERVIEWING
+  OFFERED
+  REJECTED
+}
+
+model CandidateSubmission {
+  id          String           @id @default(cuid())
+  jobOpeningId String
+  candidateName String
+  candidateEmail String
+  resumeLink   String
+  notes        String?
+  status       CandidateStatus @default(RECEIVED)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  jobOpening   JobOpening @relation(fields: [jobOpeningId], references: [id], onDelete: Cascade)
+}
+
+model Plugin {
+  id               String   @id @default(cuid())
+  name             String
+  description      String?
+  enabledByDefault Boolean  @default(true)
+  configSchema     Json?
+}
+
+model UserPluginConfig {
+  id        String   @id @default(cuid())
+  userId    String
+  pluginId  String
+  enabled   Boolean  @default(true)
+  config    Json?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  plugin    Plugin   @relation(fields: [pluginId], references: [id], onDelete: Cascade)
+}
+
+model WebhookEndpoint {
+  id        String   @id @default(cuid())
+  userId    String
+  url       String
+  eventTypes String[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  logs      WebhookLog[]
+}
+
+model WebhookLog {
+  id          String   @id @default(cuid())
+  endpointId  String
+  status      Int
+  errorMessage String?
+  timestamp   DateTime @default(now())
+
+  endpoint    WebhookEndpoint @relation(fields: [endpointId], references: [id], onDelete: Cascade)
 }
 
 model Account {

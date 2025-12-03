@@ -1,6 +1,6 @@
 # ResumeCraft – AI Resume + Cover Letter Builder
 
-ResumeCraft is a modern, ATS-friendly resume and cover-letter platform with inline AI assistance, template switching, an ATS checker, a lightweight job tracker, and advanced career intelligence.
+ResumeCraft is a modern, ATS-friendly resume and cover-letter platform with inline AI assistance, template switching, an ATS checker, a lightweight job tracker, and advanced career intelligence. It now evolves toward a CareerOS with job discovery, interview prep, portfolios, outreach, and recruiter portals.
 
 ## Tech stack
 - Next.js App Router, TypeScript, Tailwind CSS, shadcn/ui components
@@ -9,6 +9,7 @@ ResumeCraft is a modern, ATS-friendly resume and cover-letter platform with inli
 - AI abstraction for OpenAI-compatible chat completions
 - React Query for client data fetching/caching
 - Recharts for insights, docx export helper, in-app feature flags & rate limiting
+- New CareerOS modules: job discovery, interview prep, portfolio generator, outreach, recruiter portal, plugins/webhooks scaffolding
 
 ## Getting started
 1. Install dependencies  
@@ -53,6 +54,11 @@ src/app
     resources/[slug]      # Blog/resource posts
   (app)/                  # Authenticated product experience (dashboard, resumes, ATS, job tracker)
     personas, insights    # Personas management + analytics
+    jobs                  # Job discovery & matching
+    apply/[jobLeadId]     # Application prep wizard
+    interviews            # Interview practice & story bank
+    portfolio             # Portfolio builder
+    outreach              # Contacts & outreach console
   api/                    # REST-style endpoints (AI, resumes, templates, job tracker, PDF)
 components/               # Shared UI and layout pieces (shadcn/ui style)
 lib/                      # Prisma client, auth config, AI client, ATS helper, validators, templates
@@ -82,3 +88,4 @@ The `/api/templates` endpoint and `/templates` gallery will pick it up automatic
 - `/app` routes are protected by NextAuth middleware; use the registration flow or seed users.
 - Stripe/payments are stubbed but the UI is ready for a future integration.
 - PDF export is available at `/api/resumes/[id]/pdf` using @react-pdf/renderer; DOCX at `/api/resumes/[id]/docx`; LinkedIn-style JSON at `/api/resumes/[id]/export-linkedin-style`.
+- CareerOS additions: job sources/leads + matching AI, apply wizard, interview question generation/evaluation, story bank scaffold, portfolio + public `/p/[slug]`, outreach contacts/messages with AI drafts, recruiter org/openings + public apply links.
