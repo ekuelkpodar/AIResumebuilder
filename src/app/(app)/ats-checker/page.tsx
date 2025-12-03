@@ -19,6 +19,7 @@ type Score = {
   };
   missingKeywords: string[];
   suggestions: string[];
+  coverage?: { score: number; strong: string[]; weak: string[] };
 };
 
 export default function AtsCheckerPage() {
@@ -114,6 +115,24 @@ export default function AtsCheckerPage() {
                   <p className="text-lg font-semibold">{value}/100</p>
                 </div>
               ))}
+              {result.coverage && (
+                <div className="rounded-lg border bg-muted/30 p-3 sm:col-span-2">
+                  <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                    Skills & keywords coverage
+                  </p>
+                  <p className="text-lg font-semibold">{result.coverage.score}/100</p>
+                  <div className="mt-2 flex flex-wrap gap-2 text-xs">
+                    {result.coverage.strong.slice(0, 6).map((s) => (
+                      <Badge key={s} variant="secondary">
+                        {s}
+                      </Badge>
+                    ))}
+                  </div>
+                  <div className="mt-2 text-xs text-muted-foreground">
+                    Gaps: {result.coverage.weak.slice(0, 6).join(", ") || "None"}
+                  </div>
+                </div>
+              )}
             </CardContent>
           </Card>
           <Card>

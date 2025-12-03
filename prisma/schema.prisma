@@ -55,6 +55,7 @@ model User {
   emailVerified DateTime?
   image         String?
   password      String?
+  role          UserRole         @default(USER)
   createdAt     DateTime         @default(now())
   updatedAt     DateTime         @updatedAt
 
@@ -66,6 +67,14 @@ model User {
   coverLetters  CoverLetter[]
   subscription  Subscription?
   aiCalls       AICallLog[]
+  personas      CareerPersona[]
+  featureFlags  FeatureFlag[]
+  comments      Comment[]
+}
+
+enum UserRole {
+  USER
+  ADMIN
 }
 
 model UserProfile {
@@ -101,18 +110,25 @@ model Resume {
   userId        String
   title         String
   templateId    String?
+  personaId     String?
   layout        Json?
   data          Json
+  language      String?        @default("en")
   atsScore      Int?
   lastAtsCheckAt DateTime?
+  shareToken    String?        @unique
+  isPublic      Boolean        @default(false)
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
 
   user          User           @relation(fields: [userId], references: [id])
   template      Template?      @relation(fields: [templateId], references: [id])
+  persona       CareerPersona? @relation(fields: [personaId], references: [id])
   sections      ResumeSection[]
   coverLetters  CoverLetter[]
   jobApplications JobApplication[]
+  versions      ResumeVersion[]
+  comments      Comment[]
 }
 
 model ResumeSection {
@@ -185,6 +201,54 @@ model AICallLog {
   metadata  Json?
 
   user      User     @relation(fields: [userId], references: [id])
+}
+
+model CareerPersona {
+  id            String   @id @default(cuid())
+  userId        String
+  name          String
+  targetIndustry String?
+  targetRoles   String[]
+  summary       String?
+  skillsFocus   String[]
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  user          User     @relation(fields: [userId], references: [id])
+  resumes       Resume[]
+}
+
+model ResumeVersion {
+  id               String   @id @default(cuid())
+  resumeId         String
+  createdAt        DateTime @default(now())
+  label            String?
+  dataSnapshot     Json
+  atsScoreSnapshot Int?
+
+  resume           Resume   @relation(fields: [resumeId], references: [id], onDelete: Cascade)
+}
+
+model Comment {
+  id          String   @id @default(cuid())
+  resumeId    String
+  sectionId   String?
+  authorUserId String
+  body        String
+  createdAt   DateTime @default(now())
+
+  resume      Resume   @relation(fields: [resumeId], references: [id], onDelete: Cascade)
+  author      User     @relation(fields: [authorUserId], references: [id], onDelete: Cascade)
+}
+
+model FeatureFlag {
+  id        String   @id @default(cuid())
+  userId    String
+  key       String
+  enabled   Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Account {

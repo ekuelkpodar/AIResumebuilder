@@ -17,6 +17,8 @@ const navLinks = [
   { href: "/app/cover-letters", label: "Cover Letters", icon: Sparkles },
   { href: "/app/ats-checker", label: "ATS Checker", icon: Workflow },
   { href: "/app/job-tracker", label: "Job Tracker", icon: Workflow },
+  { href: "/app/personas", label: "Personas", icon: Sparkles },
+  { href: "/app/insights", label: "Insights", icon: LayoutDashboard },
   { href: "/app/settings", label: "Settings", icon: Settings },
 ];
 

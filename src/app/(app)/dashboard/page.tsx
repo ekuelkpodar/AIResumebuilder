@@ -7,6 +7,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { formatDate } from "@/lib/utils";
+import { CareerCoachPanel } from "@/components/dashboard/career-coach";
+import { Recommendations } from "@/components/dashboard/recommendations";
 
 export default async function DashboardPage() {
   const session = await getServerSession(authOptions);
@@ -135,6 +137,11 @@ export default async function DashboardPage() {
             </Button>
           </CardContent>
         </Card>
+      </div>
+
+      <div className="grid gap-4 lg:grid-cols-2">
+        <Recommendations />
+        <CareerCoachPanel />
       </div>
     </div>
   );

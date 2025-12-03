@@ -1,19 +1,5 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-
-const posts = [
-  {
-    title: "How to write STAR-format bullets",
-    description: "A quick formula to communicate impact in 3 lines.",
-  },
-  {
-    title: "ATS checklists for 2025",
-    description: "Formatting and keyword tips to avoid parsing issues.",
-  },
-  {
-    title: "Structuring a two-page resume",
-    description: "When to expand beyond one page and how to keep it clean.",
-  },
-];
+import { posts } from "@/lib/posts";
 
 export default function ResourcesPage() {
   return (
@@ -28,13 +14,15 @@ export default function ResourcesPage() {
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {posts.map((post) => (
-          <Card key={post.title} className="hover:-translate-y-0.5 transition-transform">
+          <Card key={post.slug} className="hover:-translate-y-0.5 transition-transform">
             <CardHeader>
               <CardTitle className="text-lg">{post.title}</CardTitle>
-              <CardDescription>{post.description}</CardDescription>
+              <CardDescription>{post.content.slice(0, 80)}...</CardDescription>
             </CardHeader>
             <CardContent className="text-sm text-muted-foreground">
-              Coming soon — subscribe for updates.
+              <a className="text-primary" href={`/resources/${post.slug}`}>
+                Read more
+              </a>
             </CardContent>
           </Card>
         ))}

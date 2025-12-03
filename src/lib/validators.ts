@@ -93,3 +93,38 @@ export const aiAtsSchema = z.object({
   resumeText: z.string().min(10),
   jobDescription: z.string().min(10),
 });
+
+export const aiCareerAssistantSchema = z.object({
+  question: z.string().min(5),
+});
+
+export const aiExtractSkillsSchema = z.object({
+  resumeText: z.string().min(10),
+  jobDescription: z.string().optional(),
+});
+
+export const aiTranslateSchema = z.object({
+  resumeText: z.string().min(10),
+  targetLanguage: z.string().min(2),
+  tone: z.enum(["Professional", "Confident", "Friendly", "Direct"]).default("Professional"),
+});
+
+export const aiOptimizeRoleSchema = z.object({
+  resumeText: z.string().min(10),
+  targetRoleTitle: z.string().min(2),
+  country: z.string().min(2),
+});
+
+export const personaSchema = z.object({
+  name: z.string().min(2),
+  targetIndustry: z.string().optional(),
+  targetRoles: z.array(z.string()).default([]),
+  summary: z.string().optional(),
+  skillsFocus: z.array(z.string()).default([]),
+});
+
+export const commentSchema = z.object({
+  resumeId: z.string(),
+  sectionId: z.string().optional(),
+  body: z.string().min(1),
+});

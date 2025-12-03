@@ -1,6 +1,6 @@
 # ResumeCraft – AI Resume + Cover Letter Builder
 
-ResumeCraft is a modern, ATS-friendly resume and cover-letter platform with inline AI assistance, template switching, an ATS checker, and a lightweight job tracker.
+ResumeCraft is a modern, ATS-friendly resume and cover-letter platform with inline AI assistance, template switching, an ATS checker, a lightweight job tracker, and advanced career intelligence.
 
 ## Tech stack
 - Next.js App Router, TypeScript, Tailwind CSS, shadcn/ui components
@@ -8,6 +8,7 @@ ResumeCraft is a modern, ATS-friendly resume and cover-letter platform with inli
 - Prisma + PostgreSQL
 - AI abstraction for OpenAI-compatible chat completions
 - React Query for client data fetching/caching
+- Recharts for insights, docx export helper, in-app feature flags & rate limiting
 
 ## Getting started
 1. Install dependencies  
@@ -48,7 +49,10 @@ ResumeCraft is a modern, ATS-friendly resume and cover-letter platform with inli
 ```
 src/app
   (marketing)/            # Landing, templates, pricing, resources
+    templates/[slug]      # SEO-friendly template detail
+    resources/[slug]      # Blog/resource posts
   (app)/                  # Authenticated product experience (dashboard, resumes, ATS, job tracker)
+    personas, insights    # Personas management + analytics
   api/                    # REST-style endpoints (AI, resumes, templates, job tracker, PDF)
 components/               # Shared UI and layout pieces (shadcn/ui style)
 lib/                      # Prisma client, auth config, AI client, ATS helper, validators, templates
@@ -68,6 +72,7 @@ The `/api/templates` endpoint and `/templates` gallery will pick it up automatic
 - All calls flow through `callAI` in `src/lib/ai-client.ts` (OpenAI-compatible chat completions).
 - Each endpoint validates payloads with Zod and returns JSON.
 - Add new behaviors by creating a route, crafting a concise system prompt, and parsing the response.
+- Advanced endpoints included: career assistant, skill extraction, translation, role optimization.
 
 ## Testing
 - Unit tests: `npm run test` (Vitest) – includes an ATS scoring helper test.
@@ -76,4 +81,4 @@ The `/api/templates` endpoint and `/templates` gallery will pick it up automatic
 ## Notes
 - `/app` routes are protected by NextAuth middleware; use the registration flow or seed users.
 - Stripe/payments are stubbed but the UI is ready for a future integration.
-- PDF export is available at `/api/resumes/[id]/pdf` using @react-pdf/renderer.
+- PDF export is available at `/api/resumes/[id]/pdf` using @react-pdf/renderer; DOCX at `/api/resumes/[id]/docx`; LinkedIn-style JSON at `/api/resumes/[id]/export-linkedin-style`.

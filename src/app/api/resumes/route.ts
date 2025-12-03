@@ -51,6 +51,8 @@ export async function POST(request: Request) {
         userId: user.id,
         title: parsed.data.title,
         templateId: parsed.data.templateId,
+        personaId: (body as any)?.personaId,
+        language: "en",
         layout: parsed.data.layout ?? template.layoutConfig,
         data: parsed.data.data ?? {
           summary: "",

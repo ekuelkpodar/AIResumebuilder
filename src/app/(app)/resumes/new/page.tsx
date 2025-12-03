@@ -15,8 +15,14 @@ export default function NewResumePage() {
   const preselectedTemplate = searchParams.get("templateId");
   const [title, setTitle] = useState("New Resume");
   const [creating, setCreating] = useState(false);
+  const [personas, setPersonas] = useState<{ id: string; name: string }[]>([]);
+  const [personaId, setPersonaId] = useState<string | undefined>(undefined);
 
   useEffect(() => {
+    fetch("/api/personas")
+      .then((res) => res.json())
+      .then((json) => setPersonas(json.personas ?? []))
+      .catch(() => setPersonas([]));
     if (preselectedTemplate) {
       createResume(preselectedTemplate);
     }
@@ -33,6 +39,7 @@ export default function NewResumePage() {
           title,
           templateId,
           data: importedData,
+          personaId,
         }),
       });
       const json = await res.json();
@@ -58,6 +65,20 @@ export default function NewResumePage() {
       </div>
       <div className="max-w-md">
         <Input value={title} onChange={(e) => setTitle(e.target.value)} />
+        {personas.length > 0 && (
+          <select
+            className="mt-2 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+            value={personaId ?? ""}
+            onChange={(e) => setPersonaId(e.target.value || undefined)}
+          >
+            <option value="">No persona</option>
+            {personas.map((p) => (
+              <option key={p.id} value={p.id}>
+                {p.name}
+              </option>
+            ))}
+          </select>
+        )}
       </div>
       <div className="grid gap-4 md:grid-cols-3">
         <Card className="border-dashed">
