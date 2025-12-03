@@ -10,6 +10,7 @@ ResumeCraft is a modern, ATS-friendly resume and cover-letter platform with inli
 - React Query for client data fetching/caching
 - Recharts for insights, docx export helper, in-app feature flags & rate limiting
 - New CareerOS modules: job discovery, interview prep, portfolio generator, outreach, recruiter portal, plugins/webhooks scaffolding
+- Multi-tenant foundations (Tenant, memberships, branding) to support org-level isolation and white-labeling
 
 ## Getting started
 1. Install dependencies  
@@ -31,6 +32,8 @@ ResumeCraft is a modern, ATS-friendly resume and cover-letter platform with inli
 3. Set up the database  
    ```bash
    npx prisma migrate dev --name init
+   # after multi-tenant updates, run migrations again
+   npx prisma migrate dev --name add-multi-tenant
    npx prisma db seed   # optional, add your own seed script later
    ```
 4. Run the app  

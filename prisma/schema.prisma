@@ -48,6 +48,27 @@ enum SubscriptionStatus {
   TRIALING
 }
 
+enum TenantType {
+  INDIVIDUAL
+  BOOTCAMP
+  UNIVERSITY
+  COMPANY
+  AGENCY
+}
+
+enum TenantPlan {
+  FREE
+  PRO
+  ENTERPRISE
+}
+
+enum TenantMemberRole {
+  OWNER
+  ADMIN
+  COACH
+  MEMBER
+}
+
 model User {
   id            String           @id @default(cuid())
   name          String?
@@ -80,6 +101,49 @@ model User {
   outreachMessages OutreachMessage[]
   userPlugins   UserPluginConfig[]
   webhooks      WebhookEndpoint[]
+  tenantMemberships TenantMembership[]
+}
+
+model Tenant {
+  id        String     @id @default(cuid())
+  name      String
+  slug      String     @unique
+  type      TenantType
+  plan      TenantPlan @default(FREE)
+  settings  Json       @default("{}")
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  memberships TenantMembership[]
+  branding    TenantBranding?
+}
+
+model TenantMembership {
+  id        String           @id @default(cuid())
+  tenantId  String
+  userId    String
+  role      TenantMemberRole @default(MEMBER)
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+
+  tenant    Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model TenantBranding {
+  tenantId        String  @id
+  logoUrl         String?
+  primaryColor    String?
+  secondaryColor  String?
+  accentColor     String?
+  fontFamily      String?
+  domain          String?
+  homeHeroTitle   String?
+  homeHeroSubtitle String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  tenant          Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 }
 
 enum UserRole {
@@ -97,8 +161,10 @@ model UserProfile {
   headline    String?
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
+  tenantId    String?
 
   user        User        @relation(fields: [userId], references: [id])
+  tenant      Tenant?     @relation(fields: [tenantId], references: [id], onDelete: SetNull)
 }
 
 model Template {
@@ -118,6 +184,7 @@ model Template {
 model Resume {
   id            String         @id @default(cuid())
   userId        String
+  tenantId      String?
   title         String
   templateId    String?
   personaId     String?
@@ -140,6 +207,7 @@ model Resume {
   versions      ResumeVersion[]
   comments      Comment[]
   portfolioProjects PortfolioProject[]
+  tenant        Tenant?        @relation(fields: [tenantId], references: [id], onDelete: SetNull)
 }
 
 model ResumeSection {
@@ -156,6 +224,7 @@ model ResumeSection {
 model CoverLetter {
   id        String   @id @default(cuid())
   userId    String
+  tenantId  String?
   resumeId  String?
   title     String
   content   String
@@ -165,11 +234,13 @@ model CoverLetter {
   user      User     @relation(fields: [userId], references: [id])
   resume    Resume?  @relation(fields: [resumeId], references: [id])
   jobApplications JobApplication[]
+  tenant    Tenant?  @relation(fields: [tenantId], references: [id], onDelete: SetNull)
 }
 
 model JobApplication {
   id            String       @id @default(cuid())
   userId        String
+  tenantId      String?
   title         String
   company       String
   location      String?
@@ -187,6 +258,7 @@ model JobApplication {
   user          User         @relation(fields: [userId], references: [id])
   resume        Resume?      @relation(fields: [resumeId], references: [id])
   coverLetter   CoverLetter? @relation(fields: [coverLetterId], references: [id])
+  tenant        Tenant?      @relation(fields: [tenantId], references: [id], onDelete: SetNull)
 }
 
 model Subscription {
@@ -206,17 +278,20 @@ model Subscription {
 model AICallLog {
   id        String   @id @default(cuid())
   userId    String
+  tenantId  String?
   type      String
   tokens    Int?
   createdAt DateTime @default(now())
   metadata  Json?
 
   user      User     @relation(fields: [userId], references: [id])
+  tenant    Tenant?  @relation(fields: [tenantId], references: [id], onDelete: SetNull)
 }
 
 model CareerPersona {
   id            String   @id @default(cuid())
   userId        String
+  tenantId      String?
   name          String
   targetIndustry String?
   targetRoles   String[]
@@ -227,6 +302,7 @@ model CareerPersona {
 
   user          User     @relation(fields: [userId], references: [id])
   resumes       Resume[]
+  tenant        Tenant?  @relation(fields: [tenantId], references: [id], onDelete: SetNull)
 }
 
 model ResumeVersion {
@@ -255,16 +331,19 @@ model Comment {
 model FeatureFlag {
   id        String   @id @default(cuid())
   userId    String
+  tenantId  String?
   key       String
   enabled   Boolean  @default(true)
   createdAt DateTime @default(now())
 
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tenant    Tenant?  @relation(fields: [tenantId], references: [id], onDelete: SetNull)
 }
 
 model JobSource {
   id        String   @id @default(cuid())
   userId    String
+  tenantId  String?
   name      String
   platform  String
   searchUrl String
@@ -274,6 +353,7 @@ model JobSource {
 
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   leads     JobLead[]
+  tenant    Tenant?  @relation(fields: [tenantId], references: [id], onDelete: SetNull)
 }
 
 enum JobLeadStatus {
@@ -286,6 +366,7 @@ enum JobLeadStatus {
 model JobLead {
   id          String        @id @default(cuid())
   userId      String
+  tenantId    String?
   jobSourceId String?
   title       String
   company     String
@@ -298,6 +379,7 @@ model JobLead {
 
   user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   jobSource   JobSource?    @relation(fields: [jobSourceId], references: [id], onDelete: SetNull)
+  tenant      Tenant?       @relation(fields: [tenantId], references: [id], onDelete: SetNull)
 }
 
 enum QuestionCategory {
@@ -326,6 +408,7 @@ model InterviewQuestion {
 model UserInterviewSession {
   id          String   @id @default(cuid())
   userId      String
+  tenantId    String?
   roleTarget  String
   sessionType String
   createdAt   DateTime @default(now())
@@ -333,6 +416,7 @@ model UserInterviewSession {
 
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   answers     UserInterviewAnswer[]
+  tenant      Tenant?  @relation(fields: [tenantId], references: [id], onDelete: SetNull)
 }
 
 model UserInterviewAnswer {
@@ -352,6 +436,7 @@ model UserInterviewAnswer {
 model UserStory {
   id        String   @id @default(cuid())
   userId    String
+  tenantId  String?
   title     String
   context   String?
   task      String?
@@ -362,11 +447,13 @@ model UserStory {
   updatedAt DateTime @updatedAt
 
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tenant    Tenant?  @relation(fields: [tenantId], references: [id], onDelete: SetNull)
 }
 
 model Portfolio {
   id          String   @id @default(cuid())
   userId      String
+  tenantId    String?
   slug        String   @unique
   title       String
   headline    String?
@@ -378,12 +465,14 @@ model Portfolio {
 
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   projects    PortfolioProject[]
+  tenant      Tenant?  @relation(fields: [tenantId], references: [id], onDelete: SetNull)
 }
 
 model PortfolioProject {
   id            String   @id @default(cuid())
   portfolioId   String
   resumeId      String?
+  tenantId      String?
   title         String
   subtitle      String?
   description   String?
@@ -396,11 +485,13 @@ model PortfolioProject {
 
   portfolio     Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
   resume        Resume?   @relation(fields: [resumeId], references: [id], onDelete: SetNull)
+  tenant        Tenant?   @relation(fields: [tenantId], references: [id], onDelete: SetNull)
 }
 
 model Contact {
   id        String   @id @default(cuid())
   userId    String
+  tenantId  String?
   name      String
   roleTitle String?
   company   String?
@@ -412,6 +503,7 @@ model Contact {
 
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   messages  OutreachMessage[]
+  tenant    Tenant?  @relation(fields: [tenantId], references: [id], onDelete: SetNull)
 }
 
 enum OutreachChannel {
@@ -430,6 +522,7 @@ enum OutreachStatus {
 model OutreachMessage {
   id          String          @id @default(cuid())
   userId      String
+  tenantId    String?
   contactId   String?
   channel     OutreachChannel
   body        String
@@ -442,17 +535,20 @@ model OutreachMessage {
 
   user        User            @relation(fields: [userId], references: [id], onDelete: Cascade)
   contact     Contact?        @relation(fields: [contactId], references: [id], onDelete: SetNull)
+  tenant      Tenant?         @relation(fields: [tenantId], references: [id], onDelete: SetNull)
 }
 
 model Organization {
   id        String   @id @default(cuid())
   name      String
   domain    String?
+  tenantId  String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   memberships OrganizationMembership[]
   openings   JobOpening[]
+  tenant     Tenant?  @relation(fields: [tenantId], references: [id], onDelete: SetNull)
 }
 
 enum OrganizationRole {
@@ -465,12 +561,14 @@ model OrganizationMembership {
   id              String            @id @default(cuid())
   organizationId  String
   userId          String
+  tenantId        String?
   role            OrganizationRole  @default(MEMBER)
   createdAt       DateTime          @default(now())
   updatedAt       DateTime          @updatedAt
 
   organization    Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   user            User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tenant          Tenant?           @relation(fields: [tenantId], references: [id], onDelete: SetNull)
 }
 
 enum JobOpeningStatus {
@@ -482,6 +580,7 @@ enum JobOpeningStatus {
 model JobOpening {
   id          String           @id @default(cuid())
   organizationId String
+  tenantId    String?
   title       String
   description String
   location    String?
@@ -492,6 +591,7 @@ model JobOpening {
 
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   submissions  CandidateSubmission[]
+  tenant       Tenant?      @relation(fields: [tenantId], references: [id], onDelete: SetNull)
 }
 
 enum CandidateStatus {
@@ -505,6 +605,7 @@ enum CandidateStatus {
 model CandidateSubmission {
   id          String           @id @default(cuid())
   jobOpeningId String
+  tenantId    String?
   candidateName String
   candidateEmail String
   resumeLink   String
@@ -514,6 +615,7 @@ model CandidateSubmission {
   updatedAt    DateTime @updatedAt
 
   jobOpening   JobOpening @relation(fields: [jobOpeningId], references: [id], onDelete: Cascade)
+  tenant       Tenant?    @relation(fields: [tenantId], references: [id], onDelete: SetNull)
 }
 
 model Plugin {
@@ -527,6 +629,7 @@ model Plugin {
 model UserPluginConfig {
   id        String   @id @default(cuid())
   userId    String
+  tenantId  String?
   pluginId  String
   enabled   Boolean  @default(true)
   config    Json?
@@ -535,11 +638,13 @@ model UserPluginConfig {
 
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   plugin    Plugin   @relation(fields: [pluginId], references: [id], onDelete: Cascade)
+  tenant    Tenant?  @relation(fields: [tenantId], references: [id], onDelete: SetNull)
 }
 
 model WebhookEndpoint {
   id        String   @id @default(cuid())
   userId    String
+  tenantId  String?
   url       String
   eventTypes String[]
   createdAt DateTime @default(now())
@@ -547,6 +652,7 @@ model WebhookEndpoint {
 
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   logs      WebhookLog[]
+  tenant    Tenant?  @relation(fields: [tenantId], references: [id], onDelete: SetNull)
 }
 
 model WebhookLog {
