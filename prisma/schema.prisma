@@ -655,6 +655,52 @@ model WebhookEndpoint {
   tenant    Tenant?  @relation(fields: [tenantId], references: [id], onDelete: SetNull)
 }
 
+enum SkillCategory {
+  TECHNICAL
+  SOFT
+  DOMAIN
+}
+
+enum SkillProficiency {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+  EXPERT
+}
+
+enum SkillSource {
+  RESUME
+  INTERVIEW
+  MANUAL
+  AI_INFERRED
+}
+
+model Skill {
+  id        String        @id @default(cuid())
+  name      String        @unique
+  category  SkillCategory
+  aliases   String[]
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  users     UserSkill[]
+}
+
+model UserSkill {
+  id            String          @id @default(cuid())
+  userId        String
+  tenantId      String
+  skillId       String
+  proficiency   SkillProficiency
+  confidence    Float           @default(0.6)
+  source        SkillSource
+  lastUpdatedAt DateTime        @default(now())
+
+  user          User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tenant        Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  skill         Skill           @relation(fields: [skillId], references: [id], onDelete: Cascade)
+}
+
 model WebhookLog {
   id          String   @id @default(cuid())
   endpointId  String

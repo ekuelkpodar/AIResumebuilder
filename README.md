@@ -11,6 +11,7 @@ ResumeCraft is a modern, ATS-friendly resume and cover-letter platform with inli
 - Recharts for insights, docx export helper, in-app feature flags & rate limiting
 - New CareerOS modules: job discovery, interview prep, portfolio generator, outreach, recruiter portal, plugins/webhooks scaffolding
 - Multi-tenant foundations (Tenant, memberships, branding) to support org-level isolation and white-labeling
+- Skills graph foundations (Skill/UserSkill) with AI extraction endpoint and skills page
 
 ## Getting started
 1. Install dependencies  

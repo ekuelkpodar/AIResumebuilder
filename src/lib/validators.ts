@@ -242,6 +242,12 @@ export const webhookSchema = z.object({
   eventTypes: z.array(z.string()).min(1),
 });
 
+export const aiExtractUserSkillsSchema = z.object({
+  resumeText: z.string().min(10),
+  jobApplications: z.array(z.string()).optional(),
+  interviewAnswers: z.array(z.string()).optional(),
+});
+
 export const personaSchema = z.object({
   name: z.string().min(2),
   targetIndustry: z.string().optional(),

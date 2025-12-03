@@ -22,6 +22,7 @@ const navLinks = [
   { href: "/app/interviews", label: "Interviews", icon: Workflow },
   { href: "/app/portfolio", label: "Portfolio", icon: LayoutDashboard },
   { href: "/app/outreach", label: "Outreach", icon: LayoutDashboard },
+  { href: "/app/skills", label: "Skills", icon: Sparkles },
   { href: "/app/insights", label: "Insights", icon: LayoutDashboard },
   { href: "/org", label: "Recruiter", icon: LayoutDashboard },
   { href: "/app/settings", label: "Settings", icon: Settings },
